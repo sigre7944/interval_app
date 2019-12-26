@@ -9,6 +9,10 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    return null;
+    return Scaffold(
+      body: ListView(
+        children: <Widget>[],
+      ),
+    );
   }
 }
