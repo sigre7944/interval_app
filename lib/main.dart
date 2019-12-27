@@ -1,4 +1,7 @@
+// Copyright 2019 By Champions. All rights reserved.
+
 import 'package:flutter/material.dart';
+
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:interval_app/screens/page_study.dart';
@@ -24,7 +27,6 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
-  List<String> _todoItems = [];
   int _currentIndex = 0;
 
   final List<Widget> _children = [StudyPage(), ArchivePage(), SettingsPage()];

@@ -1,4 +1,9 @@
+// Copyright 2019 By Champions. All rights reserved.
+
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'dart:convert';
+import 'package:path_provider/path_provider.dart';
 
 class Query {
   static var currentTimeString;
@@ -23,7 +28,67 @@ class StudyPage extends StatefulWidget {
 }
 
 class _StudyPageState extends State<StudyPage> {
-  String getTime() {
+  TextEditingController keyInputController = new TextEditingController();
+  TextEditingController valueInputController = new TextEditingController();
+
+  File jsonFile;
+  Directory dir;
+  String fileName = 'database.json';
+  bool fileExists = false;
+  //To hold value from JSON file
+  Map<String, dynamic> fileContent;
+
+  @override
+  void initState() {
+    super.initState();
+    //Asynchronous returned, thus the then()
+    getApplicationDocumentsDirectory().then((Directory directory) {
+      dir = directory;
+      jsonFile = new File(dir.path + "/" + fileName);
+      fileExists = jsonFile.existsSync();
+      if (fileExists)
+        this.setState(
+          () => fileContent = jsonDecode(
+            jsonFile.readAsStringSync(),
+          ),
+        );
+    });
+    print("hey");
+  }
+
+  @override
+  void dispose() {
+    keyInputController.dispose();
+    valueInputController.dispose();
+    super.dispose();
+  }
+
+  void _createFile(
+      Map<String, String> content, Directory dir, String fileName) {
+    print("Creating File!");
+    File file = new File(dir.path + "/" + fileName);
+    file.createSync();
+    fileExists = file.existsSync();
+    file.writeAsStringSync(jsonEncode(content));
+  }
+
+  void _writeToFile(String key, String value) {
+    print('Writing to file');
+    Map<String, String> content = {key: value};
+    if (fileExists) {
+      print("File exists");
+      Map<String, dynamic> jsonFileContent =
+          jsonDecode(jsonFile.readAsStringSync());
+      jsonFileContent.addAll(content);
+      jsonFile.writeAsStringSync(jsonEncode(jsonFileContent));
+    } else {
+      print("File does not exist!");
+      _createFile(content, dir, fileName);
+    }
+    this.setState(() => fileContent = jsonDecode(jsonFile.readAsStringSync()));
+  }
+
+  String _getTime() {
     Query query = new Query();
     Query.currentTimeString = query.datetimefucntion();
     return Query.currentTimeString;
@@ -38,20 +103,40 @@ class _StudyPageState extends State<StudyPage> {
           new Column(
             children: <Widget>[
               Padding(
-                  padding: EdgeInsets.only(top: 150.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      Expanded(
-                        flex: 1,
-                        child: Container(
-                          color: Colors.red,
-                          height: 1.5,
-                        ),
+                padding: EdgeInsets.only(top: 150.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Expanded(
+                      flex: 1,
+                      child: Container(
+                        color: Colors.red,
+                        height: 1.5,
                       ),
-                    ],
-                  )),
+                    ),
+                  ],
+                ),
+              ),
+              new Text(
+                "File content: ",
+                style: new TextStyle(fontWeight: FontWeight.bold),
+              ),
+              new Text(fileContent.toString()),
+              new Padding(padding: new EdgeInsets.only(top: 10.0)),
+              new Text("Add to JSON file: "),
+              new TextField(
+                controller: keyInputController,
+              ),
+              new TextField(
+                controller: valueInputController,
+              ),
+              new Padding(padding: new EdgeInsets.only(top: 20.0)),
+              new RaisedButton(
+                child: new Text("Add key, value pair"),
+                onPressed: () => _writeToFile(
+                    keyInputController.text, valueInputController.text),
+              ),
               Padding(
                   padding: EdgeInsets.only(top: 50.0),
                   child: new Column(
