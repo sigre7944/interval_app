@@ -1,14 +1,20 @@
 // Copyright 2019 By Champions. All rights reserved.
 
 import 'package:flutter/material.dart';
-
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:camera/camera.dart';
 
 import 'package:interval_app/screens/page_study.dart';
 import 'package:interval_app/screens/page_archive.dart';
 import 'package:interval_app/screens/page_settings.dart';
 
-void main() => runApp(IntervalApp());
+List<CameraDescription> cameras;
+
+Future<Null> main() async {
+  //This is so whenever users open the app it will ask for cameras
+  cameras = await availableCameras();
+  runApp(IntervalApp());
+}
 
 class IntervalApp extends StatelessWidget {
   @override
@@ -16,12 +22,14 @@ class IntervalApp extends StatelessWidget {
     return new MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Interval Learning App',
-        home: new HomePage(),
+        home: new HomePage(cameras),
         theme: new ThemeData(primarySwatch: Colors.blue));
   }
 }
 
 class HomePage extends StatefulWidget {
+  var cameras;
+  HomePage(this.cameras);
   @override
   createState() => new HomePageState();
 }
@@ -29,7 +37,11 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   int _currentIndex = 0;
 
-  final List<Widget> _children = [StudyPage(), ArchivePage(), SettingsPage()];
+  final List<Widget> _children = [
+    StudyPage(cameras),
+    ArchivePage(),
+    SettingsPage()
+  ];
 
   @override
   Widget build(BuildContext context) {

@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'dart:convert';
+import 'package:camera/camera.dart';
 import 'package:path_provider/path_provider.dart';
 
 class Query {
@@ -23,11 +24,15 @@ class Query {
 }
 
 class StudyPage extends StatefulWidget {
+  List<CameraDescription> cameras;
+  StudyPage(this.cameras);
   @override
   State<StatefulWidget> createState() => _StudyPageState();
 }
 
 class _StudyPageState extends State<StudyPage> {
+  CameraController controller;
+
   TextEditingController keyInputController = new TextEditingController();
   TextEditingController valueInputController = new TextEditingController();
 
@@ -41,6 +46,9 @@ class _StudyPageState extends State<StudyPage> {
   @override
   void initState() {
     super.initState();
+
+    controller =
+        new CameraController(widget.cameras[0], ResolutionPreset.medium);
     //Asynchronous returned, thus the then()
     getApplicationDocumentsDirectory().then((Directory directory) {
       dir = directory;
@@ -84,6 +92,16 @@ class _StudyPageState extends State<StudyPage> {
     } else {
       print("File does not exist!");
       _createFile(content, dir, fileName);
+    }
+    this.setState(() => fileContent = jsonDecode(jsonFile.readAsStringSync()));
+  }
+
+  _deleteByKey(String key) {
+    if (fileExists) {
+      Map<String, dynamic> jsonFileContent =
+          jsonDecode(jsonFile.readAsStringSync());
+      jsonFileContent.remove(key);
+      jsonFile.writeAsStringSync(jsonEncode(jsonFileContent));
     }
     this.setState(() => fileContent = jsonDecode(jsonFile.readAsStringSync()));
   }
@@ -137,6 +155,9 @@ class _StudyPageState extends State<StudyPage> {
                 onPressed: () => _writeToFile(
                     keyInputController.text, valueInputController.text),
               ),
+              new RaisedButton(
+                  child: new Text('Delete by Key'),
+                  onPressed: () => _deleteByKey(keyInputController.text)),
               Padding(
                   padding: EdgeInsets.only(top: 50.0),
                   child: new Column(
